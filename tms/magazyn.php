@@ -1,18 +1,15 @@
 <?php
-// Połączenie z bazą danych
 $mysqli = new mysqli("localhost", "root", "", "tms_logistyka");
 
 if ($mysqli->connect_error) {
     die("Błąd połączenia z bazą: " . $mysqli->connect_error);
 }
 
-// DOPASOWANE DO TWOJEJ TABELI 'klient'
 $wynikKlienci = $mysqli->query("SELECT * FROM klient");
 $klienci = [];
 
 if ($wynikKlienci) {
     while ($row = $wynikKlienci->fetch_assoc()) {
-        // Łączymy imię i nazwisko w jedną nazwę firmy (np. Logistyka Polska Sp. z o.o.)
         $pelnaNazwa = $row['imie'] . ' ' . $row['nazwisko'];
         $klienci[] = [
             'id' => $row['id'],
@@ -182,7 +179,6 @@ if ($wynikKlienci) {
     </div>
 
     <script>
-        // Funkcja przepisująca NIP automatycznie po wyborze klienta
         function uzupelnijNip() {
             const select = document.getElementById('selectKontrahent');
             // Pobieramy ukryty parametr 'data-nip' z wybranej opcji listy
@@ -216,7 +212,7 @@ if ($wynikKlienci) {
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
-                    window.location.href = 'index.php'; // Automatyczny powrót na stronę główną po zapisie!
+                    window.location.href = 'index.php'; 
                 })
                 .catch(error => alert("Błąd: " + error.message));
         });
