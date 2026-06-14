@@ -1,19 +1,16 @@
 <?php
-// Połączenie z Twoją bazą danych w XAMPP
 $mysqli = new mysqli("localhost", "root", "", "tms_logistyka");
 
 if ($mysqli->connect_error) {
     die("Błąd połączenia z bazą: " . $mysqli->connect_error);
 }
 
-// Pobieramy wszystkie dostępne pojazdy
 $wynikPojazdy = $mysqli->query("SELECT * FROM Pojazd WHERE status_dostepnosci = 1");
 $pojazdy = [];
 while ($row = $wynikPojazdy->fetch_assoc()) {
     $pojazdy[] = $row;
 }
 
-// Dopisz to pod zapytaniem o pojazdy
 $wynikKierowcy = $mysqli->query("SELECT * FROM kierowca");
 $kierowcy = [];
 while ($row = $wynikKierowcy->fetch_assoc()) {
@@ -91,13 +88,14 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
 <body>
 
     <nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <a href="index.php" class="btn btn-outline-light btn-sm fw-bold">
-            <i class="bi bi-arrow-left-circle"></i> Powrót do Pulpitu
-        </a>
-        <span class="navbar-brand mb-0 h1 m-0"><i class="bi bi-truck"></i> System TMS - Panel Spedytora</span>
-        <div style="width: 145px;"></div> </div>
-</nav>
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a href="index.php" class="btn btn-outline-light btn-sm fw-bold">
+                <i class="bi bi-arrow-left-circle"></i> Powrót do Pulpitu
+            </a>
+            <span class="navbar-brand mb-0 h1 m-0"><i class="bi bi-truck"></i> System TMS - Panel Spedytora</span>
+            <div style="width: 145px;"></div>
+        </div>
+    </nav>
 
     <div class="container-fluid dashboard-container">
         <div class="row">
@@ -326,16 +324,13 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
     </div>
 
     <script>
-        // Funkcja wywoływana po kliknięciu "Planuj" w lewej tabeli
         function wybierzZlecenie(id, numer, masa) {
             document.getElementById('selectedZlecenieId').value = id;
             document.getElementById('selectedZlecenieMasa').value = masa;
 
-            // Zmieniamy tekst w select ładunku dla widoczności
             const selectTowar = document.querySelector('select[name="idTowaru"]');
             selectTowar.innerHTML = `<option value="1">Ładunek ze zlecenia: ${numer} (${masa} kg)</option>`;
 
-            // AUTOMATYZACJA: Liczymy propozycję palet (Masa / 500 kg)
             let proponowanePalety = Math.ceil(masa / 500);
 
             if (proponowanePalety <= 0) {
@@ -348,13 +343,11 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
             alert(`Wybrano zlecenie: ${numer}.\nSystem sugeruje przygotowanie ${proponowanePalety} palet (w przeliczniku ~500kg/paleta).\n\nMożesz zmienić tę liczbę przed kliknięciem "Oblicz LDM".`);
         }
 
-        // Funkcja łącząca wybór taboru z tabeli floty
         function wybierzPojazd(id, opis) {
             document.getElementById('selectIdPojazdu').value = id;
             alert("Ustawiono tabor: " + opis);
         }
 
-        // OBSŁUGA KALKULATORA LDM
         document.getElementById('kalkulatorForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -417,13 +410,11 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
                 });
         });
 
-        // POPRAWIONA OBSŁUGA ZATWIERDZANIA - ZAPOBIEGANIE WYSYŁANIU NULL
         document.getElementById('btnZatwierdz').addEventListener('click', function() {
             const idZlecenia = document.getElementById('selectedZlecenieId').value;
             const idPojazdu = document.getElementById('selectIdPojazdu').value;
             const idKierowcy = document.getElementById('selectIdKierowcy').value;
 
-            // Walidacja: Zapobiegamy zatwierdzeniu pustego planu
             if (!idZlecenia) {
                 alert("Błąd operacyjny: Nie można zatwierdzić planu! Najpierw wybierz zlecenie z listy (kliknij przycisk 'Planuj' w tabeli po lewej stronie).");
                 return;
@@ -441,7 +432,7 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
                     })
                     .then(data => {
                         alert(data.message);
-                        location.reload(); // Odświeżamy stronę, aby zaktualizować status zlecenia w bazie i zwolnić formularz
+                        location.reload();
                     })
                     .catch(error => {
                         alert("Wystąpił problem z integracją API: " + error.message);
@@ -449,7 +440,6 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
             }
         });
 
-        // IMPORT NOWEGO ZLECENIA DO BAZY
         document.getElementById('importForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -463,7 +453,6 @@ while ($row = $wynikKierowcy->fetch_assoc()) {
                 });
         });
 
-        // DYNAMICZNY DOKUMENT
         document.getElementById('btnPdf').addEventListener('click', function() {
             const ldmText = document.getElementById('resLdm').innerText;
             const wagaText = document.getElementById('resWaga').innerText;
