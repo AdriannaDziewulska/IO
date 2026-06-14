@@ -4,26 +4,22 @@ ini_set('display_errors', 0);
 
 $mysqli = new mysqli("localhost", "root", "", "tms_logistyka");
 
-// NOWOŚĆ: Pobieramy ID kierowcy przekazane ze strony głównej (domyślnie 1, jeśli wejdziemy bezpośrednio)
 $idKierowcy = isset($_GET['id']) ? intval($_GET['id']) : 1;
 
 $zlecenie = null;
 $imieNazwiskoKierowcy = "Kierowca Testowy";
 
 if (!$mysqli->connect_error) {
-    // 1. Pobieramy imię wybranego kierowcy
     $wynikK = $mysqli->query("SELECT imie_nazwisko FROM kierowca WHERE id = $idKierowcy");
     if($wynikK && $rk = $wynikK->fetch_assoc()) {
         $imieNazwiskoKierowcy = $rk['imie_nazwisko'];
     }
 
-    // 2. Pobieramy ostatnie zlecenie przypisane konkretnie do tego kierowcy!
     $wynik = $mysqli->query("SELECT * FROM zlecenia WHERE id_kierowcy = $idKierowcy ORDER BY id DESC LIMIT 1");
     if ($wynik) { $zlecenie = $wynik->fetch_assoc(); }
 }
 
 if (!$zlecenie) {
-    // Dane demonstracyjne, jeśli kierowca nie ma jeszcze przypisanego zlecenia przez Adę
     $zlecenie = null;
 }
 $status = $zlecenie ? $zlecenie['status'] : 'Brak';
@@ -138,26 +134,22 @@ $status = $zlecenie ? $zlecenie['status'] : 'Brak';
 </div>
 
 <script>
-// PARAMETRY STARTOWE
-const idK = "<?php echo $idKierowcy; ?>"; // Unikalne ID wybranego kierowcy z bazy
-const PELNY_CZAS = 4.5 * 60 * 60; // 16200 sekund
+const idK = "<?php echo $idKierowcy; ?>"; 
+const PELNY_CZAS = 4.5 * 60 * 60;
 let timerInterval = null;
 
-// 1. INICJALIZACJA Z UNIKALNYM KLUCZEM DLA KAŻDEGO KIEROWCY
 let totalSeconds = localStorage.getItem('tacho_seconds_' + idK) ? parseInt(localStorage.getItem('tacho_seconds_' + idK)) : PELNY_CZAS;
 let isPaused = localStorage.getItem('tacho_paused_' + idK) === 'true';
 
 let aktualnyStatusBazy = "<?php echo $status; ?>";
 
-// Uruchomienie tacho na starcie w zależności od statusu
 window.addEventListener('load', () => {
-    aktualizujWyswietlacz(); // Pokazujemy zapamiętany czas od razu po wejściu
+    aktualizujWyswietlacz(); 
     
     if(aktualnyStatusBazy === 'Zaakceptowane' || aktualnyStatusBazy === 'W realizacji') {
         document.getElementById('btnPrzerwa').disabled = false;
         
         if(aktualnyStatusBazy === 'W realizacji') {
-            // Przywracamy wygląd przycisku Przerwa z pamięci dedykowanej dla tego kierowcy
             if(isPaused) {
                 ustawWygladPrzerwa();
             } else {
@@ -201,7 +193,6 @@ function odpalLicznik() {
         if(!isPaused) {
             totalSeconds--;
             
-            // ZAPISUJEMY KAŻDĄ SEKUNDĘ DLA KONKRETNEGO KIEROWCY
             localStorage.setItem('tacho_seconds_' + idK, totalSeconds);
             
             if(totalSeconds <= 0) {
@@ -228,28 +219,25 @@ function aktualizujWyswietlacz() {
     const txtTimer = document.getElementById('txtTimer');
     txtTimer.innerText = formattedTime;
     
-    if(totalSeconds < 900) { // Czerwony poniżej 15 minut
+    if(totalSeconds < 900) {
         txtTimer.style.color = '#e74c3c';
     } else {
         txtTimer.style.color = '#2c3e50';
     }
 }
 
-// FUNKCJA PRZERWY Z TRWAŁĄ I UNIKALNĄ PAMIĘCIĄ
 function togglePrzerwa() {
     if(!isPaused) {
-        // Start przerwy
         isPaused = true;
         localStorage.setItem('tacho_paused_' + idK, 'true');
         ustawWygladPrzerwa();
     } else {
-        // Koniec przerwy -> Pełen reset czasu i czyszczenie pamięci kierowcy
         isPaused = false;
         localStorage.setItem('tacho_paused_' + idK, 'false');
         clearInterval(timerInterval);
         
         totalSeconds = PELNY_CZAS;
-        localStorage.setItem('tacho_seconds_' + idK, totalSeconds); // Reset zapisu czasu
+        localStorage.setItem('tacho_seconds_' + idK, totalSeconds);
         
         aktualizujWyswietlacz();
         ustawWygladJazda();
