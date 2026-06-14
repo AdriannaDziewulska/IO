@@ -1,5 +1,4 @@
 <?php
-// Połączenie z bazą danych, aby pobrać kierowców do wyboru
 $mysqli = new mysqli("localhost", "root", "", "tms_logistyka");
 $kierowcy = [];
 
@@ -12,7 +11,6 @@ if (!$mysqli->connect_error) {
     }
 }
 
-// Dane awaryjne na wypadek braku połączenia
 if (empty($kierowcy)) {
     $kierowcy = [
         ['id' => 1, 'imie_nazwisko' => 'Jan Kowalski', 'status' => 'Wolny'],
@@ -121,7 +119,6 @@ if (empty($kierowcy)) {
 
 <script>
 function otworzPanelKierowcy(idKierowcy) {
-    // Przekierowujemy do pliku kierowca.php, podając ID wybranego kierowcy w adresie URL (?id=...)
     window.location.href = 'kierowca.php?id=' + idKierowcy;
 }
 </script>
